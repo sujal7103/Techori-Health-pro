@@ -1,15 +1,14 @@
-
 import { apiRequest } from "./api";
 import { AuthUser, UserRole } from "@/types/app.types";
 
-export const loginUser = async (email: string, password: string) => {
-  console.log('Attempting login with:', email);
+export const loginUser = async (email: string, password: string, role: UserRole) => {
+  console.log('Attempting login with:', { email, role });
   
   try {
     // Login request to get token
-    const data = await apiRequest('/auth', {
+    const data = await apiRequest('/users/login', { // Updated endpoint to match backend
       method: 'POST',
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password, role }) // Include role in the request
     });
     
     console.log('Login response received:', data);
@@ -73,9 +72,13 @@ export const registerUser = async (
 export const getCurrentUser = async (): Promise<AuthUser | null> => {
   try {
     console.log('Fetching current user data');
-    const userData = await apiRequest('/auth');
+    const userData = await apiRequest('/users/me'); // Updated endpoint to match backend
     console.log('User data received:', userData);
     
+    if (!userData) {
+      return null;
+    }
+
     return {
       id: userData._id,
       email: userData.email,
